@@ -1,0 +1,64 @@
+# Public API Plugin Group Claim
+# Balanced settings for public-facing APIs
+# CORS and rate limiting only, no authentication required
+---
+apiVersion: gateway.crossplane.io/v1alpha1
+kind: ApisixPluginGroup
+metadata:
+  name: public-api-plugins
+  namespace: default
+  labels:
+    team: platform
+    environment: production
+    type: plugin-group-claim
+spec:
+  # Plugin group identification
+  groupName: public-api
+  description: "Public API plugin group with CORS and rate limiting for public-facing endpoints"
+  
+  # Rate limiting - moderate for public APIs
+  rateLimit:
+    enabled: true
+    requestsPerSecond: 200
+    burstSize: 400
+  
+  # CORS - allow common origins
+  cors:
+    enabled: true
+    allowOrigins: "https://example.com,https://www.example.com,https://app.example.com"
+    allowMethods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+    allowHeaders: "Content-Type,Authorization"
+    exposeHeaders: "X-Request-ID,X-RateLimit-Remaining,X-RateLimit-Reset"
+    maxAge: 7200
+  
+  # API Key authentication - disabled for public APIs
+  apiKey:
+    enabled: false
+    headerName: "X-API-Key"
+  
+  # IP restriction - disabled for public APIs
+  ipRestriction:
+    enabled: false
+  
+  # Proxy rewrite - disabled
+  proxyRewrite:
+    enabled: false
+  
+  # Response rewrite - add public headers
+  responseRewrite:
+    enabled: true
+    headers:
+      X-API-Version: "v1"
+      X-Powered-By: "APISIX"
+      Cache-Control: "public, max-age=300"
+  
+  # Prometheus metrics - enabled
+  prometheus:
+    enabled: true
+    preferName: true
+  
+  # Request ID tracing - enabled
+  requestId:
+    enabled: true
+    includeInResponse: true
+

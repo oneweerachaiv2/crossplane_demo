@@ -1,0 +1,162 @@
+# APISIX Plugin Group CompositeResourceDefinition (XRD)
+# Provides a simplified API for creating reusable groups of APISIX plugins
+# Allows developers to define plugin configurations once and reference them across multiple routes
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xapixisplugingroups.gateway.crossplane.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  group: gateway.crossplane.io
+  names:
+    kind: XApisixPluginGroup
+    plural: xapixisplugingroups
+  
+  claimNames:
+    kind: ApisixPluginGroup
+    plural: apixisplugingroups
+  
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - groupName
+              properties:
+                # Plugin group identification
+                groupName:
+                  type: string
+                  description: "Name for the plugin group (e.g., production, development, public-api)"
+                
+                description:
+                  type: string
+                  description: "Description of the plugin group and its purpose"
+                
+                # Rate limiting configuration
+                rateLimit:
+                  type: object
+                  description: "Rate limiting plugin configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: false
+                    requestsPerSecond:
+                      type: integer
+                      default: 100
+                    burstSize:
+                      type: integer
+                      default: 200
+                
+                # CORS configuration
+                cors:
+                  type: object
+                  description: "CORS plugin configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: false
+                    allowOrigins:
+                      type: string
+                      default: "*"
+                    allowMethods:
+                      type: string
+                      default: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+                    allowHeaders:
+                      type: string
+                      default: "*"
+                    exposeHeaders:
+                      type: string
+                      default: "*"
+                    maxAge:
+                      type: integer
+                      default: 3600
+                
+                # API Key authentication
+                apiKey:
+                  type: object
+                  description: "API key authentication plugin configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: false
+                    headerName:
+                      type: string
+                      default: "X-API-Key"
+                
+                # IP restriction
+                ipRestriction:
+                  type: object
+                  description: "IP restriction plugin configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: false
+                    whitelist:
+                      type: array
+                      items:
+                        type: string
+                      description: "Allowed IP addresses/CIDRs"
+                    blacklist:
+                      type: array
+                      items:
+                        type: string
+                      description: "Blocked IP addresses/CIDRs"
+                
+                # Request/Response rewriting
+                proxyRewrite:
+                  type: object
+                  description: "Proxy rewrite plugin configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: false
+                    uriPrefix:
+                      type: string
+                      description: "Prefix to strip from URI"
+                
+                # Response rewrite
+                responseRewrite:
+                  type: object
+                  description: "Response rewrite plugin configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: false
+                    headers:
+                      type: object
+                      additionalProperties:
+                        type: string
+                      description: "Headers to add to response"
+                
+                # Prometheus metrics
+                prometheus:
+                  type: object
+                  description: "Prometheus metrics plugin configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                    preferName:
+                      type: boolean
+                      default: true
+                
+                # Request ID tracing
+                requestId:
+                  type: object
+                  description: "Request ID tracing plugin configuration"
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                    includeInResponse:
+                      type: boolean
+                      default: true
+

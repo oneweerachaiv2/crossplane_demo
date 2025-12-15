@@ -1,0 +1,69 @@
+# Production Plugin Group Claim
+# Strict security and rate limiting for production APIs
+# Includes authentication, IP restriction, and aggressive rate limiting
+---
+apiVersion: gateway.crossplane.io/v1alpha1
+kind: ApisixPluginGroup
+metadata:
+  name: production-plugins
+  namespace: default
+  labels:
+    team: platform
+    environment: production
+    type: plugin-group-claim
+spec:
+  # Plugin group identification
+  groupName: production
+  description: "Production plugin group with strict security, authentication, and rate limiting"
+  
+  # Rate limiting - strict for production
+  rateLimit:
+    enabled: true
+    requestsPerSecond: 50
+    burstSize: 100
+  
+  # CORS - restricted to known origins
+  cors:
+    enabled: true
+    allowOrigins: "https://app.example.com,https://api.example.com"
+    allowMethods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+    allowHeaders: "Content-Type,Authorization,X-API-Key"
+    exposeHeaders: "X-Request-ID,X-RateLimit-Remaining"
+    maxAge: 3600
+  
+  # API Key authentication - required
+  apiKey:
+    enabled: true
+    headerName: "X-API-Key"
+  
+  # IP restriction - whitelist only known IPs
+  ipRestriction:
+    enabled: true
+    whitelist:
+      - "10.0.0.0/8"
+      - "172.16.0.0/12"
+      - "192.168.0.0/16"
+  
+  # Proxy rewrite - disabled
+  proxyRewrite:
+    enabled: false
+  
+  # Response rewrite - add security headers
+  responseRewrite:
+    enabled: true
+    headers:
+      X-Content-Type-Options: "nosniff"
+      X-Frame-Options: "DENY"
+      X-XSS-Protection: "1; mode=block"
+      Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+  
+  # Prometheus metrics - enabled
+  prometheus:
+    enabled: true
+    preferName: true
+  
+  # Request ID tracing - enabled
+  requestId:
+    enabled: true
+    includeInResponse: true
+

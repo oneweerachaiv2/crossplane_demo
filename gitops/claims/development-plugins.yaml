@@ -1,0 +1,63 @@
+# Development Plugin Group Claim
+# Relaxed settings for development and testing
+# Allows all origins, higher rate limits, no IP restrictions
+---
+apiVersion: gateway.crossplane.io/v1alpha1
+kind: ApisixPluginGroup
+metadata:
+  name: development-plugins
+  namespace: default
+  labels:
+    team: platform
+    environment: development
+    type: plugin-group-claim
+spec:
+  # Plugin group identification
+  groupName: development
+  description: "Development plugin group with relaxed settings for testing and debugging"
+  
+  # Rate limiting - generous for development
+  rateLimit:
+    enabled: true
+    requestsPerSecond: 1000
+    burstSize: 2000
+  
+  # CORS - allow all origins for development
+  cors:
+    enabled: true
+    allowOrigins: "*"
+    allowMethods: "GET,POST,PUT,DELETE,PATCH,OPTIONS,HEAD"
+    allowHeaders: "*"
+    exposeHeaders: "*"
+    maxAge: 3600
+  
+  # API Key authentication - disabled for development
+  apiKey:
+    enabled: false
+    headerName: "X-API-Key"
+  
+  # IP restriction - disabled for development
+  ipRestriction:
+    enabled: false
+  
+  # Proxy rewrite - disabled
+  proxyRewrite:
+    enabled: false
+  
+  # Response rewrite - minimal headers
+  responseRewrite:
+    enabled: true
+    headers:
+      X-Environment: "development"
+      X-Debug-Mode: "enabled"
+  
+  # Prometheus metrics - enabled
+  prometheus:
+    enabled: true
+    preferName: true
+  
+  # Request ID tracing - enabled
+  requestId:
+    enabled: true
+    includeInResponse: true
+

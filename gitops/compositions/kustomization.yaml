@@ -9,6 +9,8 @@ resources:
   - webapp-composition.yaml
   - apiroute-xrd.yaml
   - apiroute-composition.yaml
+  - plugingroup-xrd.yaml
+  - plugingroup-composition.yaml
 
 commonLabels:
   managed-by: argocd

@@ -1,0 +1,153 @@
+# APISIX Plugin Group Composition
+# Creates ApisixPluginConfig CRDs using Crossplane Kubernetes Provider
+# Allows reusable plugin configurations across multiple routes
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: apixisplugingroup-apisix
+  labels:
+    crossplane.io/xrd: xapixisplugingroups.gateway.crossplane.io
+    provider: kubernetes
+    gateway: apisix
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  compositeTypeRef:
+    apiVersion: gateway.crossplane.io/v1alpha1
+    kind: XApisixPluginGroup
+  
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          # Resource 1: ApisixPluginConfig - Main plugin configuration
+          - name: apisix-plugin-config
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
+              metadata:
+                labels:
+                  type: apisix-plugin-config
+                  managed-by: crossplane
+              spec:
+                forProvider:
+                  manifest:
+                    apiVersion: apisix.apache.org/v2
+                    kind: ApisixPluginConfig
+                    metadata:
+                      namespace: default
+                      labels:
+                        managed-by: crossplane-composition
+                        type: plugin-group
+                    spec:
+                      plugins:
+                        # Prometheus metrics - always included
+                        - name: prometheus
+                          enable: true
+                          config:
+                            prefer_name: true
+                        # Request ID for tracing - always included
+                        - name: request-id
+                          enable: true
+                          config:
+                            include_in_response: true
+                providerConfigRef:
+                  name: default
+            patches:
+              # Plugin config name
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.groupName
+                toFieldPath: spec.forProvider.manifest.metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: "%s-plugins"
+              # Add description as label
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.description
+                toFieldPath: spec.forProvider.manifest.metadata.labels.description
+          
+          # Resource 2: ConfigMap - Plugin group metadata and documentation
+          - name: plugingroup-metadata
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
+              metadata:
+                labels:
+                  type: plugingroup-metadata
+                  managed-by: crossplane
+              spec:
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: ConfigMap
+                    metadata:
+                      namespace: default
+                      labels:
+                        managed-by: crossplane-composition
+                        type: apisix-plugingroup-metadata
+                    data:
+                      GROUP_NAME: ""
+                      DESCRIPTION: ""
+                      RATE_LIMIT_ENABLED: "false"
+                      CORS_ENABLED: "false"
+                      API_KEY_ENABLED: "false"
+                      IP_RESTRICTION_ENABLED: "false"
+                      MANAGED_BY: "crossplane-plugingroup-composition"
+                providerConfigRef:
+                  name: default
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.groupName
+                toFieldPath: spec.forProvider.manifest.metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: "%s-plugingroup-metadata"
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.groupName
+                toFieldPath: spec.forProvider.manifest.data.GROUP_NAME
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.description
+                toFieldPath: spec.forProvider.manifest.data.DESCRIPTION
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.rateLimit.enabled
+                toFieldPath: spec.forProvider.manifest.data.RATE_LIMIT_ENABLED
+                transforms:
+                  - type: string
+                    string:
+                      type: Convert
+                      toType: string
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.cors.enabled
+                toFieldPath: spec.forProvider.manifest.data.CORS_ENABLED
+                transforms:
+                  - type: string
+                    string:
+                      type: Convert
+                      toType: string
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.apiKey.enabled
+                toFieldPath: spec.forProvider.manifest.data.API_KEY_ENABLED
+                transforms:
+                  - type: string
+                    string:
+                      type: Convert
+                      toType: string
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.ipRestriction.enabled
+                toFieldPath: spec.forProvider.manifest.data.IP_RESTRICTION_ENABLED
+                transforms:
+                  - type: string
+                    string:
+                      type: Convert
+                      toType: string
+

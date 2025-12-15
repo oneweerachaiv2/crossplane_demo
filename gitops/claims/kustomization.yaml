@@ -12,6 +12,9 @@ resources:
   - demo-api-route.yaml
   - httpbin-api-route.yaml
   - redis-api-route.yaml
+  - production-plugins.yaml
+  - development-plugins.yaml
+  - public-api-plugins.yaml
 
 commonLabels:
   managed-by: argocd
