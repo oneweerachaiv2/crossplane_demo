@@ -10,6 +10,7 @@ resources:
   - nginx-app.yaml
   - httpbin-app.yaml
   - redis-app.yaml
+  - echo-app.yaml
 
 commonLabels:
   managed-by: argocd
