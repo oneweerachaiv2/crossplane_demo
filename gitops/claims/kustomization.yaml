@@ -8,6 +8,7 @@ namespace: default
 
 resources:
   - my-webapp.yaml
+  - team-api-app.yaml
 
 commonLabels:
   managed-by: argocd

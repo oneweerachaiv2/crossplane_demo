@@ -1,0 +1,28 @@
+# Team API Application - Uses WebApp Composition
+# Demonstrates how developers can deploy apps with a simple claim
+---
+apiVersion: demo.crossplane.io/v1alpha1
+kind: WebApp
+metadata:
+  name: team-api-app
+  namespace: default
+  labels:
+    team: api-team
+    environment: dev
+    type: claim
+spec:
+  # Application name - used for Deployment, Service, ConfigMap
+  appName: team-api
+  
+  # Container image to run
+  image: hashicorp/http-echo:latest
+  
+  # Number of replicas
+  replicas: 3
+  
+  # Application port
+  port: 8080
+  
+  # Custom message (stored in ConfigMap)
+  message: "Hello from Team API! Deployed via GitOps + Crossplane Composition 🎯"
+
