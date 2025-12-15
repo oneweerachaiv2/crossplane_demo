@@ -121,33 +121,13 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.rateLimit.enabled
                 toFieldPath: spec.forProvider.manifest.data.RATE_LIMIT_ENABLED
-                transforms:
-                  - type: string
-                    string:
-                      type: Convert
-                      toType: string
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.cors.enabled
                 toFieldPath: spec.forProvider.manifest.data.CORS_ENABLED
-                transforms:
-                  - type: string
-                    string:
-                      type: Convert
-                      toType: string
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.apiKey.enabled
                 toFieldPath: spec.forProvider.manifest.data.API_KEY_ENABLED
-                transforms:
-                  - type: string
-                    string:
-                      type: Convert
-                      toType: string
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.ipRestriction.enabled
                 toFieldPath: spec.forProvider.manifest.data.IP_RESTRICTION_ENABLED
-                transforms:
-                  - type: string
-                    string:
-                      type: Convert
-                      toType: string
 
