@@ -1,0 +1,17 @@
+# WebApp Claim - User-facing API
+# This is what application developers use to deploy their apps
+# Crossplane will automatically create: Deployment, Service, ConfigMap
+---
+apiVersion: demo.crossplane.io/v1alpha1
+kind: WebApp
+metadata:
+  name: my-webapp
+  namespace: default
+spec:
+  # Simple parameters - Crossplane handles the complexity
+  appName: gitops-demo
+  image: hashicorp/http-echo:latest
+  replicas: 2
+  port: 5678
+  message: "Hello from GitOps + Crossplane Composition! 🚀"
+

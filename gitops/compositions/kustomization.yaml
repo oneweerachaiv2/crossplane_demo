@@ -1,0 +1,14 @@
+# Kustomization for Crossplane Compositions
+# XRDs and Compositions are cluster-scoped resources
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - webapp-xrd.yaml
+  - webapp-composition.yaml
+
+commonLabels:
+  managed-by: argocd
+  type: composition
+

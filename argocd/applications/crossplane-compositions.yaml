@@ -1,0 +1,76 @@
+# ArgoCD Application for Crossplane Compositions
+# Deploys XRDs and Compositions (cluster-scoped resources)
+# Must be synced BEFORE claims
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-compositions
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/oneweerachaiv2/crossplane_demo.git
+    targetRevision: main
+    path: gitops/compositions
+    
+  destination:
+    server: https://kubernetes.default.svc
+    # No namespace - cluster-scoped resources
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+# ArgoCD Application for Crossplane Claims
+# Deploys Claims that use the Compositions
+# Must be synced AFTER compositions
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-claims
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/oneweerachaiv2/crossplane_demo.git
+    targetRevision: main
+    path: gitops/claims
+    
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+

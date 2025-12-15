@@ -1,0 +1,133 @@
+# WebApp Composition
+# Implements XWebApp by creating: Deployment, Service, ConfigMap
+# Uses Crossplane Kubernetes Provider to create resources
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: webapp-kubernetes
+  labels:
+    crossplane.io/xrd: xwebapps.demo.crossplane.io
+    provider: kubernetes
+spec:
+  compositeTypeRef:
+    apiVersion: demo.crossplane.io/v1alpha1
+    kind: XWebApp
+
+  resources:
+    # Resource 1: ConfigMap
+    - name: configmap
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          forProvider:
+            manifest:
+              apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                namespace: default
+              data:
+                WELCOME_MESSAGE: ""
+                APP_VERSION: "1.0.0"
+                DEPLOYED_BY: "crossplane-composition"
+          providerConfigRef:
+            name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.forProvider.manifest.metadata.name
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-config"
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.message
+          toFieldPath: spec.forProvider.manifest.data.WELCOME_MESSAGE
+
+    # Resource 2: Deployment
+    - name: deployment
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          forProvider:
+            manifest:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                namespace: default
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    app: placeholder
+                template:
+                  metadata:
+                    labels:
+                      app: placeholder
+                      deployed-by: crossplane-composition
+                  spec:
+                    containers:
+                      - name: app
+                        image: placeholder
+                        ports:
+                          - containerPort: 80
+          providerConfigRef:
+            name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.forProvider.manifest.metadata.name
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.forProvider.manifest.spec.selector.matchLabels.app
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.forProvider.manifest.spec.template.metadata.labels.app
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.image
+          toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].image
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.replicas
+          toFieldPath: spec.forProvider.manifest.spec.replicas
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.port
+          toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].ports[0].containerPort
+
+    # Resource 3: Service
+    - name: service
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          forProvider:
+            manifest:
+              apiVersion: v1
+              kind: Service
+              metadata:
+                namespace: default
+              spec:
+                type: ClusterIP
+                selector:
+                  app: placeholder
+                ports:
+                  - port: 80
+                    targetPort: 80
+          providerConfigRef:
+            name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.forProvider.manifest.metadata.name
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.forProvider.manifest.spec.selector.app
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.port
+          toFieldPath: spec.forProvider.manifest.spec.ports[0].port
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.port
+          toFieldPath: spec.forProvider.manifest.spec.ports[0].targetPort
+
