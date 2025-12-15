@@ -11,6 +11,11 @@
 ```bash
 ssh -i eapi-gateway-api-poc_key.pem azureuser@172.188.120.75
 ```
+# ArgoCD
+https://172.188.120.75:30090
+admin
+OODJnB2qyv48KKag
+
 # Subscription ID
 3c6373fe-834d-4f88-bb56-539b8e02bd96
 

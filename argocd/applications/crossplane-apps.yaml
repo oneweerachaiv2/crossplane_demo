@@ -18,9 +18,9 @@ spec:
     # path: gitops/apps/crossplane-objects
     
     # For local demo without Git repo
-    repoURL: https://github.com/argoproj/argocd-example-apps.git
-    targetRevision: HEAD
-    path: guestbook
+    repoURL: https://github.com/oneweerachaiv2/crossplane_demo.git
+    targetRevision: main
+    path: gitops/apps/crossplane-objects
     
   destination:
     server: https://kubernetes.default.svc
