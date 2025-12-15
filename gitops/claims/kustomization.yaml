@@ -10,6 +10,8 @@ resources:
   - my-webapp.yaml
   - team-api-app.yaml
   - demo-api-route.yaml
+  - httpbin-api-route.yaml
+  - redis-api-route.yaml
 
 commonLabels:
   managed-by: argocd

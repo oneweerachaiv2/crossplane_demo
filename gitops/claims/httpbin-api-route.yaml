@@ -1,0 +1,61 @@
+# HTTPBin API Route Claim
+# Uses the APIRoute Composition to create an APISIX route
+# Routes to the httpbin service for testing HTTP functionality
+---
+apiVersion: gateway.crossplane.io/v1alpha1
+kind: APIRoute
+metadata:
+  name: httpbin-api-route
+  namespace: default
+  labels:
+    team: platform
+    environment: dev
+    type: api-claim
+spec:
+  # Route identification
+  routeName: httpbin-api
+  
+  # Path configuration
+  path: /api/httpbin/*
+  pathType: prefix
+  
+  # Upstream service configuration
+  # Routes to the httpbin service
+  upstreamService: httpbin
+  upstreamPort: 8080
+  upstreamNamespace: default
+  
+  # Allowed HTTP methods
+  methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - PATCH
+    - HEAD
+    - OPTIONS
+  
+  # Plugin configurations
+  plugins:
+    # Enable rate limiting - more generous for testing
+    rateLimit:
+      enabled: true
+      requestsPerSecond: 200
+      burstSize: 400
+    
+    # Enable CORS for frontend access
+    cors:
+      enabled: true
+      allowOrigins: "*"
+      allowMethods: "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS"
+      allowHeaders: "*"
+      maxAge: 7200
+    
+    # Enable request ID for tracing
+    apiKey:
+      enabled: false
+    
+    # Proxy rewrite disabled
+    proxyRewrite:
+      enabled: false
+
