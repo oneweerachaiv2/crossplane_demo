@@ -1,0 +1,54 @@
+# Demo API Route Claim
+# Uses the APIRoute Composition to create an APISIX route
+# Demonstrates the simplified interface for developers
+---
+apiVersion: gateway.crossplane.io/v1alpha1
+kind: APIRoute
+metadata:
+  name: demo-api-route
+  namespace: default
+  labels:
+    team: platform
+    environment: dev
+    type: api-claim
+spec:
+  # Route identification
+  routeName: demo-api
+  
+  # Path configuration
+  path: /api/demo/*
+  pathType: prefix
+  
+  # Upstream service configuration
+  # This routes to the gitops-demo service we created earlier
+  upstreamService: gitops-demo
+  upstreamPort: 5678
+  upstreamNamespace: default
+  
+  # Allowed HTTP methods
+  methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+  
+  # Plugin configurations
+  plugins:
+    # Enable rate limiting
+    rateLimit:
+      enabled: true
+      requestsPerSecond: 100
+      burstSize: 200
+    
+    # Enable CORS for frontend access
+    cors:
+      enabled: true
+      allowOrigins: "*"
+      allowMethods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+      allowHeaders: "*"
+      maxAge: 3600
+    
+    # Enable request ID for tracing
+    proxyRewrite:
+      enabled: false
+

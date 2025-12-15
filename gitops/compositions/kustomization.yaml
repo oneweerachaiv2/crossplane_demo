@@ -7,6 +7,8 @@ kind: Kustomization
 resources:
   - webapp-xrd.yaml
   - webapp-composition.yaml
+  - apiroute-xrd.yaml
+  - apiroute-composition.yaml
 
 commonLabels:
   managed-by: argocd

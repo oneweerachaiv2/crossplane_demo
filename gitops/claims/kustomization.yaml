@@ -9,6 +9,7 @@ namespace: default
 resources:
   - my-webapp.yaml
   - team-api-app.yaml
+  - demo-api-route.yaml
 
 commonLabels:
   managed-by: argocd

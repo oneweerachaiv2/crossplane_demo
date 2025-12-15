@@ -1,0 +1,173 @@
+# APISIX Route CompositeResourceDefinition (XRD)
+# Provides a simplified API for creating APISIX routes with common plugins
+# Abstracts the complexity of APISIX CRD configuration
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xapiroutes.gateway.crossplane.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  group: gateway.crossplane.io
+  names:
+    kind: XAPIRoute
+    plural: xapiroutes
+  
+  claimNames:
+    kind: APIRoute
+    plural: apiroutes
+  
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - routeName
+                - path
+                - upstreamService
+                - upstreamPort
+              properties:
+                # Route identification
+                routeName:
+                  type: string
+                  description: "Name for the APISIX route"
+                
+                # Path configuration
+                path:
+                  type: string
+                  description: "URI path for the route (e.g., /api/v1/*)"
+                  default: "/*"
+                
+                # Exact path match or prefix
+                pathType:
+                  type: string
+                  description: "Path matching type"
+                  enum: ["prefix", "exact"]
+                  default: "prefix"
+                
+                # Host/domain configuration
+                host:
+                  type: string
+                  description: "Host/domain for the route (optional)"
+                
+                # HTTP methods
+                methods:
+                  type: array
+                  items:
+                    type: string
+                    enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+                  description: "Allowed HTTP methods"
+                  default: ["GET", "POST", "PUT", "DELETE"]
+                
+                # Upstream service configuration
+                upstreamService:
+                  type: string
+                  description: "Name of the upstream Kubernetes service"
+                
+                upstreamPort:
+                  type: integer
+                  description: "Port of the upstream service"
+                  default: 80
+                
+                upstreamNamespace:
+                  type: string
+                  description: "Namespace of the upstream service"
+                  default: "default"
+                
+                # Plugin configurations
+                plugins:
+                  type: object
+                  description: "APISIX plugins to enable"
+                  properties:
+                    # Rate limiting
+                    rateLimit:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                        requestsPerSecond:
+                          type: integer
+                          default: 100
+                        burstSize:
+                          type: integer
+                          default: 200
+                    
+                    # CORS configuration
+                    cors:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                        allowOrigins:
+                          type: string
+                          default: "*"
+                        allowMethods:
+                          type: string
+                          default: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+                        allowHeaders:
+                          type: string
+                          default: "*"
+                        exposeHeaders:
+                          type: string
+                          default: "*"
+                        maxAge:
+                          type: integer
+                          default: 3600
+                    
+                    # API Key authentication
+                    apiKey:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                        headerName:
+                          type: string
+                          default: "X-API-Key"
+                    
+                    # Request/Response transformation
+                    proxyRewrite:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                        uriPrefix:
+                          type: string
+                          description: "Prefix to strip from URI"
+                    
+                    # IP restriction
+                    ipRestriction:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                        whitelist:
+                          type: array
+                          items:
+                            type: string
+                          description: "Allowed IP addresses/CIDRs"
+                    
+                    # Response rewrite
+                    responseRewrite:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                        headers:
+                          type: object
+                          additionalProperties:
+                            type: string
+                          description: "Headers to add to response"
+
