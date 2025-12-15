@@ -1,0 +1,15 @@
+# Example WebApp Claim - Deploy Nginx
+---
+apiVersion: demo.crossplane.io/v1alpha1
+kind: WebApp
+metadata:
+  name: nginx-app
+  namespace: default
+spec:
+  appName: nginx-app
+  image: nginx:latest
+  replicas: 2
+  port: 80
+  serviceType: ClusterIP
+  namespace: default
+

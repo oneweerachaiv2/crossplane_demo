@@ -1,0 +1,15 @@
+# Example WebApp Claim - Deploy HTTPBin
+---
+apiVersion: demo.crossplane.io/v1alpha1
+kind: WebApp
+metadata:
+  name: httpbin-app
+  namespace: default
+spec:
+  appName: httpbin-app
+  image: kennethreitz/httpbin:latest
+  replicas: 1
+  port: 8080
+  serviceType: NodePort
+  namespace: default
+

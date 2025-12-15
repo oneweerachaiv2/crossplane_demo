@@ -1,0 +1,19 @@
+# Storage Claim Example
+# This is what end-users use to request storage resources
+# They don't need to know about Azure Resource Groups or Storage Accounts!
+---
+apiVersion: demo.crossplane.io/v1alpha1
+kind: Storage
+metadata:
+  name: my-app-storage
+  namespace: default
+spec:
+  # Simple, user-friendly parameters
+  location: southeastasia
+  storageType: standard
+  size: small
+  
+  # Composition selector (which composition to use)
+  compositionRef:
+    name: storage-azure
+

@@ -1,0 +1,12 @@
+# Kubernetes Provider Configuration
+# This configures Crossplane to connect to the Kind cluster
+# The provider will use the in-cluster service account to authenticate
+---
+apiVersion: kubernetes.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: InjectedIdentity
+

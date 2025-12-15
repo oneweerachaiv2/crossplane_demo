@@ -1,0 +1,63 @@
+# Composition using Pipeline mode (Crossplane v1.14+)
+# This defines HOW to create Azure resources when a user requests a Storage
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: storage-azure
+  labels:
+    provider: azure
+spec:
+  compositeTypeRef:
+    apiVersion: demo.crossplane.io/v1alpha1
+    kind: XStorage
+  
+  mode: Pipeline
+  pipeline:
+    - step: create-resource-group
+      functionRef:
+        name: crossplane-contrib-function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        metadata:
+          name: create-resource-group
+        spec:
+          source: Inline
+          inline:
+            template: |
+              apiVersion: azure.upbound.io/v1beta1
+              kind: ResourceGroup
+              metadata:
+                name: {{ .observed.composite.metadata.name }}-rg
+              spec:
+                forProvider:
+                  location: {{ .observed.composite.spec.location }}
+                providerConfigRef:
+                  name: default
+    
+    - step: create-storage-account
+      functionRef:
+        name: crossplane-contrib-function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        metadata:
+          name: create-storage-account
+        spec:
+          source: Inline
+          inline:
+            template: |
+              apiVersion: storage.azure.upbound.io/v1beta1
+              kind: Account
+              metadata:
+                name: {{ .observed.composite.metadata.name }}-sa
+              spec:
+                forProvider:
+                  accountTier: {{ if eq .observed.composite.spec.storageType "premium" }}Premium{{ else }}Standard{{ end }}
+                  accountReplicationType: LRS
+                  resourceGroupName: {{ .observed.composite.metadata.name }}-rg
+                  location: {{ .observed.composite.spec.location }}
+                providerConfigRef:
+                  name: default
+

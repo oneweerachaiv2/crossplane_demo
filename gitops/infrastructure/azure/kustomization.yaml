@@ -1,0 +1,16 @@
+# Kustomization for Azure Infrastructure
+# This allows ArgoCD to deploy Azure infrastructure via Crossplane
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - simple-storage-demo.yaml
+  # Uncomment when ready to deploy claims
+  # - storage-claim.yaml
+
+commonLabels:
+  managed-by: argocd
+  provisioner: crossplane
+  cloud: azure
+

@@ -1,0 +1,29 @@
+# Simple demo: Create Azure resources directly using Crossplane
+# This demonstrates the basic Crossplane workflow without compositions
+---
+# 1. Create a Resource Group
+apiVersion: azure.upbound.io/v1beta1
+kind: ResourceGroup
+metadata:
+  name: crossplane-demo-rg
+spec:
+  forProvider:
+    location: southeastasia
+  providerConfigRef:
+    name: default
+
+---
+# 2. Create a Storage Account
+apiVersion: storage.azure.upbound.io/v1beta1
+kind: Account
+metadata:
+  name: crossplanedemostore
+spec:
+  forProvider:
+    accountTier: Standard
+    accountReplicationType: LRS
+    resourceGroupName: crossplane-demo-rg
+    location: southeastasia
+  providerConfigRef:
+    name: default
+

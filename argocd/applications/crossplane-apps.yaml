@@ -1,0 +1,83 @@
+# ArgoCD Application for Crossplane Objects (Apps)
+# This Application syncs Crossplane Objects that deploy Kubernetes applications
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    # Using local path for demo - replace with your Git repo URL
+    # repoURL: https://github.com/your-org/your-repo.git
+    # targetRevision: main
+    # path: gitops/apps/crossplane-objects
+    
+    # For local demo without Git repo
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+    
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+# ArgoCD Application for Infrastructure (Azure resources)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-infrastructure
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    # Using local path for demo - replace with your Git repo URL
+    # repoURL: https://github.com/your-org/your-repo.git
+    # targetRevision: main
+    # path: gitops/infrastructure/azure
+    
+    # For local demo without Git repo
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+    
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+

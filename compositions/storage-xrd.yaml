@@ -1,0 +1,59 @@
+# Composite Resource Definition (XRD)
+# This defines the API schema for a custom "StorageBucket" resource
+# Users will use this to request storage without knowing Azure-specific details
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xstorages.demo.crossplane.io
+spec:
+  group: demo.crossplane.io
+  names:
+    kind: XStorage
+    plural: xstorages
+  claimNames:
+    kind: Storage
+    plural: storages
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                # User-facing parameters (abstracted from Azure specifics)
+                location:
+                  type: string
+                  description: "Azure region (e.g., eastus, westeurope)"
+                  default: "eastus"
+                storageType:
+                  type: string
+                  description: "Storage tier: standard or premium"
+                  enum:
+                    - standard
+                    - premium
+                  default: "standard"
+                size:
+                  type: string
+                  description: "Storage size: small, medium, large"
+                  enum:
+                    - small
+                    - medium
+                    - large
+                  default: "small"
+              required:
+                - location
+            status:
+              type: object
+              properties:
+                storageAccountName:
+                  type: string
+                  description: "The name of the created storage account"
+                resourceGroupName:
+                  type: string
+                  description: "The name of the created resource group"
+

@@ -1,0 +1,78 @@
+# Composition
+# This defines HOW to create Azure resources when a user requests a Storage
+# It maps the user-friendly XStorage API to actual Azure resources
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: storage-azure
+  labels:
+    provider: azure
+spec:
+  compositeTypeRef:
+    apiVersion: demo.crossplane.io/v1alpha1
+    kind: XStorage
+
+  resources:
+    # 1. Create a Resource Group first
+    - name: resource-group
+      base:
+        apiVersion: azure.upbound.io/v1beta1
+        kind: ResourceGroup
+        spec:
+          forProvider:
+            location: eastus
+          providerConfigRef:
+            name: default
+      patches:
+        # Patch the location from user input
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.location
+          toFieldPath: spec.forProvider.location
+        # Set the resource group name based on the claim name
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "rg-%s"
+    
+    # 2. Create a Storage Account in the Resource Group
+    - name: storage-account
+      base:
+        apiVersion: storage.azure.upbound.io/v1beta1
+        kind: Account
+        spec:
+          forProvider:
+            accountTier: Standard
+            accountReplicationType: LRS
+            resourceGroupNameSelector:
+              matchControllerRef: true
+            location: eastus
+          providerConfigRef:
+            name: default
+      patches:
+        # Patch the location
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.location
+          toFieldPath: spec.forProvider.location
+        # Set storage tier based on storageType
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.storageType
+          toFieldPath: spec.forProvider.accountTier
+          transforms:
+            - type: map
+              map:
+                standard: Standard
+                premium: Premium
+        # Set the storage account name
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "sa%s"
+                type: Format
+

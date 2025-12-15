@@ -1,0 +1,72 @@
+# ArgoCD Application using Directory-based source
+# This is for deploying Crossplane Objects from a local directory
+# Works when manifests are in a Git repo or local path
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-demo-apps
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: crossplane-demo-apps
+    app.kubernetes.io/part-of: crossplane-demo
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    # GitHub repository (if you push your code there)
+    # repoURL: https://github.com/YOUR_USERNAME/crossplane-demo.git
+    # targetRevision: main
+    # path: examples
+    
+    # For demo: using ArgoCD example apps
+    repoURL: https://github.com/oneweerachaiv2/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+    
+    # Directory settings
+    directory:
+      recurse: false
+      include: '*.yaml'
+      exclude: '*-test.yaml'
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  
+  # Sync policy for automatic reconciliation
+  syncPolicy:
+    automated:
+      # Automatically sync when changes detected
+      prune: true
+      # Self-heal if someone manually changes resources
+      selfHeal: true
+      # Allow syncing to empty target
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Ignore differences in certain fields (Crossplane sets these)
+  ignoreDifferences:
+    - group: kubernetes.crossplane.io
+      kind: Object
+      jsonPointers:
+        - /status
+    - group: "*"
+      kind: "*"
+      managedFieldsManagers:
+        - crossplane-kubernetes-provider
+

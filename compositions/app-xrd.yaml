@@ -1,0 +1,62 @@
+# Composite Resource Definition for Web Applications
+# This defines a user-friendly API for deploying web applications
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xwebapps.demo.crossplane.io
+spec:
+  group: demo.crossplane.io
+  names:
+    kind: XWebApp
+    plural: xwebapps
+  claimNames:
+    kind: WebApp
+    plural: webapps
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                appName:
+                  type: string
+                  description: Name of the application
+                image:
+                  type: string
+                  description: Docker image to deploy
+                replicas:
+                  type: integer
+                  default: 1
+                  description: Number of replicas
+                port:
+                  type: integer
+                  default: 8080
+                  description: Container port
+                serviceType:
+                  type: string
+                  enum: ["ClusterIP", "NodePort", "LoadBalancer"]
+                  default: "ClusterIP"
+                  description: Kubernetes service type
+                namespace:
+                  type: string
+                  default: "default"
+                  description: Kubernetes namespace to deploy to
+              required:
+                - appName
+                - image
+            status:
+              type: object
+              properties:
+                deploymentReady:
+                  type: boolean
+                serviceReady:
+                  type: boolean
+                podCount:
+                  type: integer
+

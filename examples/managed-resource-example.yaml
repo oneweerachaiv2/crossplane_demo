@@ -1,0 +1,36 @@
+# Direct Managed Resource Example
+# This shows how to create Azure resources directly without compositions
+# Useful for learning, but compositions are preferred for production
+---
+# Create a Resource Group directly
+apiVersion: azure.upbound.io/v1beta1
+kind: ResourceGroup
+metadata:
+  name: example-rg
+spec:
+  forProvider:
+    location: eastus
+    tags:
+      environment: dev
+      managedBy: crossplane
+  providerConfigRef:
+    name: default
+---
+# Create a Storage Account in the Resource Group
+apiVersion: storage.azure.upbound.io/v1beta1
+kind: Account
+metadata:
+  name: examplestorageacct
+spec:
+  forProvider:
+    location: eastus
+    resourceGroupNameRef:
+      name: example-rg
+    accountTier: Standard
+    accountReplicationType: LRS
+    tags:
+      environment: dev
+      managedBy: crossplane
+  providerConfigRef:
+    name: default
+

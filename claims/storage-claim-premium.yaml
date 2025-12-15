@@ -1,0 +1,16 @@
+# Premium Storage Claim Example
+# Example of requesting premium storage for production workloads
+---
+apiVersion: demo.crossplane.io/v1alpha1
+kind: Storage
+metadata:
+  name: production-storage
+  namespace: default
+spec:
+  location: westeurope
+  storageType: premium
+  size: large
+  
+  compositionRef:
+    name: storage-azure
+

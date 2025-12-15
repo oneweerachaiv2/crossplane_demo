@@ -1,0 +1,24 @@
+# Azure Provider Configuration
+# This configures credentials for Azure provider
+#
+# Before applying this, create the secret with Azure credentials:
+#
+# 1. Create a service principal:
+#    az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/<subscription-id> > azure-creds.json
+#
+# 2. Create the Kubernetes secret:
+#    kubectl create secret generic azure-creds -n crossplane-system --from-file=creds=./azure-creds.json
+#
+---
+apiVersion: azure.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: azure-creds
+      key: creds
+

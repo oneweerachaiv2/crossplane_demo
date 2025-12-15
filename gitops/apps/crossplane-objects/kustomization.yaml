@@ -1,0 +1,17 @@
+# Kustomization for Crossplane Objects
+# This allows ArgoCD to deploy all Crossplane Objects in this directory
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  - nginx-app.yaml
+  - httpbin-app.yaml
+  - redis-app.yaml
+
+commonLabels:
+  managed-by: argocd
+  provisioner: crossplane
+

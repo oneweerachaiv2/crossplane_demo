@@ -1,0 +1,55 @@
+# HTTPBin Application deployed via Crossplane
+# This creates a Deployment and Service for HTTPBin
+---
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: httpbin-deployment
+spec:
+  forProvider:
+    manifest:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: httpbin-app
+        namespace: default
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: httpbin-app
+        template:
+          metadata:
+            labels:
+              app: httpbin-app
+          spec:
+            containers:
+              - name: httpbin
+                image: kennethreitz/httpbin:latest
+                ports:
+                  - containerPort: 8080
+  providerConfigRef:
+    name: default
+---
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: httpbin-service
+spec:
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: httpbin-app
+        namespace: default
+      spec:
+        type: ClusterIP
+        selector:
+          app: httpbin-app
+        ports:
+          - port: 8080
+            targetPort: 8080
+  providerConfigRef:
+    name: default
+

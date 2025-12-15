@@ -1,0 +1,46 @@
+# ArgoCD Application for Nginx via Crossplane
+# This deploys the Nginx Crossplane Objects
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-app
+  namespace: argocd
+  labels:
+    app: nginx
+    managed-by: argocd
+    provisioner: crossplane
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    # For Git-based deployment (replace with your repo)
+    # repoURL: https://github.com/your-org/crossplane-demo.git
+    # targetRevision: main
+    # path: gitops/apps/crossplane-objects/nginx
+    
+    # For local cluster deployment using raw manifests
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+    
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m
+
